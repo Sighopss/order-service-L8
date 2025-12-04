@@ -28,10 +28,16 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:test .
+        run: |
+          IMAGE_NAME="${{ vars.DOCKER_IMAGE_NAME }}"
+          echo "Building Docker image: ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test"
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:test
+        run: |
+          IMAGE_NAME="${{ vars.DOCKER_IMAGE_NAME }}"
+          echo "Pushing Docker image: ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test"
+          docker push ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test
 
   # -------------------------
   # Step 2: Test Job
@@ -64,9 +70,11 @@ jobs:
 
       - name: Promote Docker Image to Latest
         run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:test
-          docker tag ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:test ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:latest
+          IMAGE_NAME="${{ vars.DOCKER_IMAGE_NAME }}"
+          echo "Promoting Docker image to latest: ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME"
+          docker pull ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test
+          docker tag ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:test ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:latest
 
   # -------------------------
   # Step 4: Deploy Job
